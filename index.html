@@ -1,203 +1,1836 @@
 <!DOCTYPE html>
-<html lang="zh-HK">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <title>PROJECT BLACKCORE – FPS Game Landing Page</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Target Shooting Range</title>
+  <meta name="description" content="Lock. Load. Dominate. PROJECT BLACKCORE is a high-intensity tactical FPS built for competitive and casual players." />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
-    :root{--bg:#070a12;--panel:#0d1322;--panel2:#10192d;--line:rgba(255,255,255,.08);--txt:#eaf2ff;--muted:#94a3b8;--cyan:#18e2ff;--red:#ff4d6d;--green:#31ff8b;--shadow:0 18px 60px rgba(0,0,0,.45)}
-    *{box-sizing:border-box} html,body{height:100%} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:radial-gradient(circle at top,#10192d 0%,#070a12 45%,#04050a 100%);color:var(--txt);display:grid;place-items:center;padding:18px;overflow:hidden}
-    .app{width:min(1100px,100%);display:grid;gap:14px}
-    .topbar,.hud,.game,.footer{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid var(--line);box-shadow:var(--shadow);backdrop-filter:blur(16px);border-radius:18px}
-    .topbar{padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-    .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase}
-    .dot{width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 16px var(--green)}
-    .sub{color:var(--muted);font-size:13px}
-    .hud{padding:14px 16px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-    .stat{background:linear-gradient(180deg,rgba(16,25,45,.92),rgba(10,14,24,.92));border:1px solid var(--line);border-radius:14px;padding:12px 14px}
-    .label{color:var(--muted);font-size:11px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:6px}
-    .value{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:28px;font-weight:800;line-height:1}
-    .value.good{color:var(--green)} .value.cyan{color:var(--cyan)} .value.red{color:var(--red)}
-    .game{position:relative;min-height:560px;display:grid;place-items:center;overflow:hidden;background:radial-gradient(circle at center,rgba(24,226,255,.09),transparent 40%),linear-gradient(135deg,rgba(9,13,24,.98),rgba(8,10,18,.98))}
-    .range-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:70px 70px;opacity:.35;pointer-events:none}
-    .range-grid::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at center,transparent 0 35%,rgba(0,0,0,.22) 70%,rgba(0,0,0,.48) 100%)}
-    .arena{position:relative;width:min(100%,980px);height:min(72vh,560px);border-radius:22px;border:1px solid rgba(255,255,255,.1);overflow:hidden;background:linear-gradient(180deg,rgba(8,12,22,.92),rgba(4,6,12,.95));box-shadow:inset 0 0 0 1px rgba(24,226,255,.08),0 30px 90px rgba(0,0,0,.42)}
-    .arena::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.06),transparent 38%),radial-gradient(circle at 20% 20%,rgba(24,226,255,.15),transparent 15%),radial-gradient(circle at 80% 30%,rgba(255,77,109,.15),transparent 16%)}
-    .crosshair{position:absolute;left:50%;top:50%;width:34px;height:34px;transform:translate(-50%,-50%);pointer-events:none;opacity:.9;filter:drop-shadow(0 0 10px rgba(24,226,255,.45))}
-    .crosshair:before,.crosshair:after{content:"";position:absolute;left:50%;top:50%;background:rgba(255,255,255,.9);transform:translate(-50%,-50%)}
-    .crosshair:before{width:34px;height:2px}.crosshair:after{width:2px;height:34px}
-    .crosshair i{position:absolute;border:2px solid var(--cyan);border-radius:50%;inset:8px;opacity:.85}
-    .target{position:absolute;width:72px;height:72px;border-radius:50%;transform:translate(-50%,-50%);cursor:pointer;display:grid;place-items:center;transition:transform .08s linear;animation:spawn .16s ease-out}
-    @keyframes spawn{from{transform:translate(-50%,-50%) scale(.45);opacity:.2}to{transform:translate(-50%,-50%) scale(1);opacity:1}}
-    .target::before,.target::after{content:"";position:absolute;border-radius:50%}
-    .target::before{inset:0;background:radial-gradient(circle at 35% 30%,#fff,rgba(255,255,255,.2) 12%,rgba(24,226,255,.9) 24%,rgba(24,226,255,.5) 40%,rgba(255,77,109,.85) 41%,rgba(255,77,109,.85) 58%,rgba(255,255,255,.95) 59%,rgba(255,255,255,.95) 72%,rgba(255,77,109,.9) 73%);box-shadow:0 0 24px rgba(24,226,255,.35),0 0 42px rgba(255,77,109,.2)}
-    .target::after{inset:26px;background:#fff;box-shadow:0 0 18px rgba(255,255,255,.8)}
-    .target.hit{animation:hit .18s ease-out forwards}
-    @keyframes hit{to{transform:translate(-50%,-50%) scale(1.35);opacity:0;filter:blur(2px)}}
-    .floating{position:absolute;inset:auto auto 18px 18px;background:rgba(7,10,18,.7);border:1px solid var(--line);border-radius:14px;padding:10px 12px;color:var(--muted);font-size:13px;letter-spacing:.06em}
-    .floating b{color:var(--txt)}
-    .center-msg{position:absolute;inset:50% auto auto 50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;text-shadow:0 4px 24px rgba(0,0,0,.6)}
-    .center-msg .big{font-family:ui-monospace,monospace;font-size:38px;font-weight:900;letter-spacing:.16em}
-    .center-msg .small{margin-top:8px;color:var(--muted);font-size:14px;letter-spacing:.18em;text-transform:uppercase}
-    .footer{padding:14px 16px;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
-    .btns{display:flex;gap:10px;flex-wrap:wrap}
-    button{border:0;border-radius:999px;padding:12px 18px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease,opacity .15s ease}
-    .primary{background:linear-gradient(135deg,var(--cyan),#1af6c6);color:#021018;box-shadow:0 0 24px rgba(24,226,255,.32)}
-    .ghost{background:rgba(255,255,255,.06);color:var(--txt);border:1px solid var(--line)}
-    button:hover{transform:translateY(-1px)}
-    .note{color:var(--muted);font-size:13px}
-    @media (max-width:720px){.hud{grid-template-columns:repeat(2,minmax(0,1fr))}.arena{height:62vh}.center-msg .big{font-size:30px}}
+    :root {
+      --bg-main: #05070c;
+      --bg-alt: #0b0f18;
+      --bg-card: rgba(11, 15, 24, 0.95);
+      --bg-card-soft: rgba(13, 20, 35, 0.85);
+      --accent-primary: #18e2ff;
+      --accent-secondary: #ff3355;
+      --accent-ghost: rgba(24, 226, 255, 0.14);
+      --accent-ghost-2: rgba(255, 51, 85, 0.12);
+      --text-main: #f5f6fb;
+      --text-muted: #8a93a8;
+      --border-subtle: rgba(255, 255, 255, 0.06);
+      --shadow-soft: 0 14px 45px rgba(0, 0, 0, 0.75);
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-pill: 999px;
+      --transition-fast: 0.18s ease-out;
+      --transition-med: 0.28s ease-out;
+      --grid-line: rgba(255, 255, 255, 0.03);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      font-family: "Roboto", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(24, 226, 255, 0.12) 0, transparent 55%),
+        radial-gradient(circle at 95% 10%, rgba(255, 51, 85, 0.16) 0, transparent 60%),
+        linear-gradient(135deg, #020309 0%, #050814 45%, #05070c 100%);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 80px 80px;
+      opacity: 0.55;
+      mix-blend-mode: soft-light;
+      z-index: -4;
+    }
+
+    body::after {
+      content: "";
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 50% -20%, rgba(255, 255, 255, 0.07), transparent 60%);
+      mix-blend-mode: screen;
+      opacity: 0.4;
+      z-index: -3;
+    }
+
+    .scanline {
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: -100%;
+      height: 120%;
+      background: linear-gradient(to bottom, transparent 0%, rgba(24, 226, 255, 0.12) 50%, transparent 100%);
+      mix-blend-mode: soft-light;
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: -2;
+      animation: scan 8s linear infinite;
+    }
+
+    @keyframes scan {
+      0% {
+        transform: translateY(-40%);
+      }
+      100% {
+        transform: translateY(80%);
+      }
+    }
+
+    .noise-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.15;
+      mix-blend-mode: soft-light;
+      z-index: -1;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+    }
+
+    .site-shell {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 20px 64px;
+    }
+
+    @media (min-width: 768px) {
+      .site-shell {
+        padding: 24px 32px 80px;
+      }
+    }
+
+    .pill-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
+      background: linear-gradient(90deg, rgba(24, 226, 255, 0.22), rgba(255, 51, 85, 0.28));
+      color: var(--text-main);
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      box-shadow: 0 0 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .pill-tag span.dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-primary);
+      box-shadow: 0 0 12px rgba(24, 226, 255, 0.9);
+    }
+
+    .pill-tag span.pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 2px solid rgba(24, 226, 255, 0.7);
+      animation: pulse 1.6s ease-out infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(0.6);
+        opacity: 1;
+      }
+      80% {
+        transform: scale(1.4);
+        opacity: 0;
+      }
+      100% {
+        opacity: 0;
+      }
+    }
+
+    .section-label {
+      font-family: "Rajdhani", system-ui, sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent-primary);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .section-label::before {
+      content: "";
+      width: 32px;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(24, 226, 255, 0.8), transparent);
+    }
+
+    .section-heading {
+      font-family: "Rajdhani", system-ui, sans-serif;
+      font-weight: 700;
+      font-size: 26px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    @media (min-width: 768px) {
+      .section-heading {
+        font-size: 32px;
+      }
+    }
+
+    .section-subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      max-width: 540px;
+      line-height: 1.6;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 22px;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: background var(--transition-med), transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+      outline: none;
+      background: transparent;
+      color: var(--text-main);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-primary), #1affc9);
+      color: #020308;
+      box-shadow: 0 0 30px rgba(24, 226, 255, 0.55);
+    }
+
+    .btn-primary::after {
+      content: "";
+      position: absolute;
+      inset: 1px;
+      border-radius: inherit;
+      border: 1px solid rgba(3, 8, 18, 0.5);
+      opacity: 0.7;
+    }
+
+    .btn-primary:hover,
+    .btn-primary:focus-visible {
+      transform: translateY(-1px);
+      box-shadow: 0 0 36px rgba(24, 226, 255, 0.78);
+    }
+
+    .btn-ghost {
+      border-color: rgba(255, 255, 255, 0.3);
+      background: radial-gradient(circle at top left, rgba(24, 226, 255, 0.16), rgba(5, 8, 17, 0.9));
+      color: var(--text-main);
+    }
+
+    .btn-ghost:hover,
+    .btn-ghost:focus-visible {
+      background: radial-gradient(circle at top left, rgba(255, 51, 85, 0.22), rgba(5, 8, 17, 1));
+      border-color: rgba(255, 255, 255, 0.5);
+      box-shadow: 0 0 30px rgba(255, 51, 85, 0.5);
+      transform: translateY(-1px);
+    }
+
+    .btn-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1px solid currentColor;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+    }
+
+    .btn:focus-visible {
+      box-shadow: 0 0 0 2px rgba(24, 226, 255, 0.65);
+    }
+
+    header.site-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 14px;
+      margin-bottom: 26px;
+      border-radius: var(--radius-lg);
+      background: radial-gradient(circle at top left, rgba(24, 226, 255, 0.08), transparent 50%),
+        radial-gradient(circle at bottom right, rgba(255, 51, 85, 0.06), transparent 55%),
+        rgba(3, 7, 18, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(24px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-mark {
+      width: 30px;
+      height: 30px;
+      border-radius: 26% 74% 36% 64% / 65% 29% 71% 35%;
+      background: conic-gradient(from 200deg, rgba(24, 226, 255, 0.9), rgba(255, 51, 85, 0.9), rgba(24, 226, 255, 0.9));
+      position: relative;
+      box-shadow: 0 0 22px rgba(24, 226, 255, 0.6);
+    }
+
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      inset: 4px;
+      border-radius: inherit;
+      background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.6), transparent 55%),
+        radial-gradient(circle at 80% 90%, rgba(255, 51, 85, 0.7), transparent 50%),
+        #020308;
+      mix-blend-mode: screen;
+      opacity: 0.85;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-name {
+      font-family: "Rajdhani", system-ui, sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      font-size: 13px;
+      text-transform: uppercase;
+    }
+
+    .brand-sub {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-muted);
+    }
+
+    .nav-mini {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .nav-pill {
+      padding: 6px 10px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: radial-gradient(circle at top left, rgba(24, 226, 255, 0.2), rgba(5, 8, 20, 0.9));
+      color: var(--text-main);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-pill span.badge {
+      padding: 2px 7px;
+      border-radius: var(--radius-pill);
+      background: rgba(3, 10, 23, 0.9);
+      border: 1px solid rgba(24, 226, 255, 0.6);
+      color: var(--accent-primary);
+      font-size: 9px;
+      letter-spacing: 0.16em;
+    }
+
+    .nav-divider {
+      width: 1px;
+      height: 22px;
+      background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.55), transparent);
+      opacity: 0.4;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #21ff7a;
+      box-shadow: 0 0 10px rgba(33, 255, 122, 0.9);
+    }
+
+    @media (max-width: 640px) {
+      header.site-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .nav-mini {
+        width: 100%;
+        justify-content: space-between;
+      }
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr);
+      gap: 26px;
+      margin-bottom: 48px;
+    }
+
+    @media (min-width: 880px) {
+      .hero {
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr);
+        align-items: stretch;
+      }
+    }
+
+    .hero-left {
+      padding: 20px 18px 22px;
+      border-radius: var(--radius-lg);
+      background:
+        radial-gradient(circle at top left, rgba(24, 226, 255, 0.16), transparent 60%),
+        radial-gradient(circle at bottom right, rgba(255, 51, 85, 0.16), transparent 65%),
+        var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(24px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-left::before {
+      content: "TACTICAL FPS • NEXT-GEN ENGINE • CROSS-PLAY READY";
+      position: absolute;
+      right: -200px;
+      bottom: 16px;
+      font-size: 10px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.16);
+      transform: rotate(-7deg);
+      white-space: nowrap;
+    }
+
+    .hero-left-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .hero-title {
+      font-family: "Rajdhani", system-ui, sans-serif;
+      font-size: 32px;
+      line-height: 1.1;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .hero-title span.accent {
+      color: var(--accent-primary);
+      text-shadow: 0 0 16px rgba(24, 226, 255, 0.85);
+    }
+
+    .hero-tagline {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--accent-secondary);
+      margin-bottom: 14px;
+    }
+
+    .hero-body {
+      font-size: 14px;
+      color: var(--text-muted);
+      max-width: 480px;
+      line-height: 1.7;
+      margin-bottom: 22px;
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      margin-top: 16px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-muted);
+    }
+
+    .meta-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .meta-pill {
+      border-radius: var(--radius-pill);
+      padding: 4px 8px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      background: radial-gradient(circle at top left, rgba(24, 226, 255, 0.12), rgba(5, 8, 17, 0.9));
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-main);
+    }
+
+    .hero-right {
+      position: relative;
+      border-radius: var(--radius-lg);
+      padding: 18px 18px 20px;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(24, 226, 255, 0.25), transparent 52%),
+        radial-gradient(circle at 100% 0%, rgba(255, 51, 85, 0.35), transparent 65%),
+        radial-gradient(circle at 0% 100%, rgba(24, 226, 255, 0.14), transparent 52%),
+        var(--bg-alt);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+      backdrop-filter: blur(26px);
+    }
+
+    .hud-frame {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      border: 1px dashed rgba(255, 255, 255, 0.12);
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .hud-corner {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      border: 2px solid rgba(24, 226, 255, 0.7);
+    }
+
+    .hud-corner.tl {
+      top: 10px;
+      left: 10px;
+      border-right: none;
+      border-bottom: none;
+    }
+
+    .hud-corner.tr {
+      top: 10px;
+      right: 10px;
+      border-left: none;
+      border-bottom: none;
+    }
+
+    .hud-corner.bl {
+      bottom: 10px;
+      left: 10px;
+      border-right: none;
+      border-top: none;
+    }
+
+    .hud-corner.br {
+      bottom: 10px;
+      right: 10px;
+      border-left: none;
+      border-top: none;
+    }
+
+    .squad-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .squad-card {
+      position: relative;
+      border-radius: var(--radius-md);
+      padding: 10px 10px 12px;
+      background: radial-gradient(circle at 10% 0%, rgba(24, 226, 255, 0.15), transparent 65%),
+        radial-gradient(circle at 90% 100%, rgba(255, 51, 85, 0.16), transparent 65%),
+        rgba(3, 7, 16, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      overflow: hidden;
+    }
+
+    .squad-role {
+      font-family: "Rajdhani", system-ui, sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      color: var(--accent-primary);
+    }
+
+    .squad-name {
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .squad-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .squad-meta span {
+      color: var(--accent-secondary);
+    }
+
+    .squad-reticle {
+      position: absolute;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.32);
+      right: -6px;
+      top: -6px;
+      opacity: 0.6;
+    }
+
+    .squad-reticle::before,
+    .squad-reticle::after {
+      content: "";
+      position: absolute;
+      inset: 50%;
+      width: 110%;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.4);
+      transform-origin: center;
+    }
+
+    .squad-reticle::after {
+      transform: translate(-50%, -50%) rotate(90deg);
+    }
+
+    .holo-figure {
+      position: relative;
+      margin-top: 12px;
+      border-radius: 18px;
+      padding: 14px 14px 16px;
+      background:
+        linear-gradient(145deg, rgba(3, 9, 18, 0.9), rgba(3, 9, 18, 0.98)),
+        radial-gradient(circle at 15% 0%, rgba(24, 226, 255, 0.26), transparent 58%),
+        radial-gradient(circle at 95% 100%, rgba(255, 51, 85, 0.24), transparent 60%);
+      border: 1px solid rgba(24, 226, 255, 0.25);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.85);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.2fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 640px) {
+      .holo-figure {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .holo-silhouette-wrap {
+      position: relative;
+      min-height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .holo-circle {
+      position: absolute;
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 30% 0%, rgba(255, 255, 255, 0.7), transparent 65%),
+        radial-gradient(circle at 70% 100%, rgba(255, 51, 85, 0.7), transparent 60%),
+        radial-gradient(circle at 30% 90%, rgba(24, 226, 255, 0.8), transparent 60%);
+      opacity: 0.16;
+      filter: blur(2px);
+    }
+
+    .holo-glow-ring {
+      position: absolute;
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      border: 1px solid rgba(24, 226, 255, 0.7);
+      box-shadow: 0 0 40px rgba(24, 226, 255, 0.75);
+      opacity: 0.55;
+      animation: ringPulse 2.8s ease-in-out infinite alternate;
+    }
+
+    @keyframes ringPulse {
+      0% {
+        transform: scale(0.98);
+        opacity: 0.4;
+      }
+      100% {
+        transform: scale(1.06);
+        opacity: 0.75;
+      }
+    }
+
+    .holo-silhouette {
+      position: relative;
+      width: 78px;
+      height: 146px;
+      border-radius: 22px;
+      background:
+        linear-gradient(180deg, rgba(24, 226, 255, 0.75), rgba(3, 7, 16, 1)),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.9), transparent 65%);
+      box-shadow: 0 18px 45px rgba(24, 226, 255, 0.9);
+      clip-path: polygon(20% 0%, 80% 0%, 100% 18%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 18%);
+      opacity: 0.75;
+      transform: translateY(4px);
+    }
+
+    .holo-silhouette::after {
+      content: "";
+      position: absolute;
+      inset: 24px 18px 6px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(2, 8, 18, 0.6), rgba(0, 0, 0, 0.95));
+      box-shadow: inset 0 0 25px rgba(0, 0, 0, 1);
+      opacity: 0.9;
+    }
+
+    .holo-base {
+      position: absolute;
+      bottom: -16px;
+      left: 50%;
+      width: 120px;
+      height: 32px;
+      transform: translateX(-50%);
+      background: radial-gradient(circle at 50% 0%, rgba(24, 226, 255, 0.8), transparent 70%);
+      opacity: 0.55;
+      filter: blur(1px);
+    }
+
+    .holo-data {
+      position: relative;
+      z-index: 1;
+      padding-top: 2px;
+    }
+
+    .holo-title {
+      font-family: "Rajdhani", system-ui, sans-serif;
+      font-size: 13px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent-primary);
+      margin-bottom: 4px;
+    }
+
+    .holo-name {
+      font-size: 18px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      margin-bottom: 8px;
+    }
+
+    .holo-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 10px;
+    }
+
+    .holo-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .tag-chip {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      padding: 3px 8px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: radial-gradient(circle at top left, rgba(24, 226, 255, 0.16), rgba(5, 7, 15, 0.95));
+      color: var(--text-main);
+    }
+
+    .holo-footer-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--text-muted);
+      border-top: 1px solid rgba(255, 255, 255, 0.14);
+      padding-top: 8px;
+      margin-top: 6px;
+    }
+
+    .holo-health {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .health-bar {
+      width: 70px;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+    }
+
+    .health-fill {
+      width: 76%;
+      height: 100%;
+      background: linear-gradient(90deg, #21ff7a, #ffe600, #ff3355);
+    }
+
+    section {
+      margin-bottom: 42px;
+    }
+
+    .features-wrap {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 14px;
+    }
+
+    @media (min-width: 720px) {
+      .features-wrap {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .feature-card {
+      position: relative;
+      border-radius: var(--radius-md);
+      padding: 14px 14px 15px;
+      background:
+        linear-gradient(135deg, rgba(3, 6, 16, 0.98), rgba(3, 9, 19, 0.99)),
+        radial-gradient(circle at 0 0, rgba(24, 226, 255, 0.25), transparent 60%),
+        radial-gradient(circle at 100% 100%, rgba(255, 51, 85, 0.22), transparent 60%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      overflow: hidden;
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.9);
+      transform-origin: center;
+      transition: transform var(--transition-med), box-shadow var(--transition-med), border-color var(--transition-med), background var(--transition-med);
+    }
+
+    .feature-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 15% 0%, rgba(24, 226, 255, 0.16), transparent 60%);
+      opacity: 0;
+      transition: opacity var(--transition-med);
+    }
+
+    .feature-card:hover,
+    .feature-card:focus-within {
+      transform: translateY(-4px);
+      border-color: rgba(24, 226, 255, 0.68);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.95);
+    }
+
+    .feature-card:hover::before,
+    .feature-card:focus-within::before {
+      opacity: 1;
+    }
+
+    .feature-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: var(--accent-primary);
+      border: 1px solid rgba(24, 226, 255, 0.65);
+      background: radial-gradient(circle at top left, rgba(24, 226, 255, 0.3), rgba(3, 7, 16, 1));
+      margin-bottom: 10px;
+      box-shadow: 0 0 24px rgba(24, 226, 255, 0.55);
+    }
+
+    .feature-title {
+      font-family: "Rajdhani", system-ui, sans-serif;
+      font-size: 15px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      margin-bottom: 6px;
+    }
+
+    .feature-copy {
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--text-muted);
+      max-width: 330px;
+    }
+
+    .feature-meta-line {
+      margin-top: 10px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: rgba(255, 255, 255, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .feature-meta-line span.dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent-secondary);
+      box-shadow: 0 0 10px rgba(255, 51, 85, 0.95);
+    }
+
+    .weapons-layout {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 880px) {
+      .weapons-layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .weapon-main {
+      border-radius: var(--radius-lg);
+      padding: 14px 14px 16px;
+      background:
+        radial-gradient(circle at 0 0, rgba(24, 226, 255, 0.24), transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(255, 51, 85, 0.24), transparent 60%),
+        var(--bg-card-soft);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .weapon-hud-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 10px;
+    }
+
+    .weapon-hud-bar span.right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .weapon-divider {
+      height: 1px;
+      width: 100%;
+      background: linear-gradient(90deg, rgba(24, 226, 255, 0.8), rgba(255, 51, 85, 0.5), transparent);
+      opacity: 0.45;
+      margin-bottom: 12px;
+    }
+
+    .weapon-name {
+      font-family: "Rajdhani", system-ui, sans-serif;
+      font-size: 18px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .weapon-class {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--accent-primary);
+      margin-bottom: 12px;
+    }
+
+    .weapon-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+
+    .weapon-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .bar-track {
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    }
+
+    .weapon-copy {
+      font-size: 12px;
+      color: var(--text-muted);
+      max-width: 420px;
+      line-height: 1.7;
+    }
+
+    .weapon-wireframe {
+      position: absolute;
+      right: -14px;
+      bottom: -18px;
+      width: 210px;
+      height: 90px;
+      border-radius: 18px;
+      border: 1px solid rgba(24, 226, 255, 0.35);
+      opacity: 0.4;
+      transform: skewX(-8deg);
+      box-shadow: 0 0 30px rgba(24, 226, 255, 0.7);
+    }
+
+    .weapon-wireframe::before,
+    .weapon-wireframe::after {
+      content: "";
+      position: absolute;
+      inset: 30% 12%;
+      border-radius: 14px;
+      border: 1px dashed rgba(24, 226, 255, 0.4);
+    }
+
+    .weapon-wireframe::after {
+      inset: 12% 26%;
+      border-style: solid;
+      border-color: rgba(255, 51, 85, 0.7);
+      border-width: 0 0 1px 0;
+    }
+
+    .weapon-types {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 10px;
+    }
+
+    .weapon-mini {
+      border-radius: var(--radius-md);
+      padding: 10px 11px;
+      background:
+        radial-gradient(circle at 0 0, rgba(24, 226, 255, 0.22), transparent 60%),
+        rgba(3, 7, 16, 0.98);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      font-size: 12px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+      gap: 8px;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .weapon-mini-header {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .weapon-mini-name {
+      font-family: "Rajdhani", system-ui, sans-serif;
+      font-size: 13px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .weapon-mini-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--accent-primary);
+    }
+
+    .weapon-mini-tag {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-muted);
+    }
+
+    .weapon-mini-meter {
+      width: 100%;
+      height: 3px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+    }
+
+    .weapon-mini-fill {
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #21ff7a, var(--accent-primary));
+    }
+
+    .weapon-mini-reticle {
+      position: absolute;
+      right: -10px;
+      top: 50%;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      opacity: 0.5;
+      transform: translateY(-50%);
+    }
+
+    .weapon-mini-reticle::before,
+    .weapon-mini-reticle::after {
+      content: "";
+      position: absolute;
+      inset: 50%;
+      width: 120%;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.35);
+      transform-origin: center;
+    }
+
+    .weapon-mini-reticle::after {
+      transform: translate(-50%, -50%) rotate(90deg);
+    }
+
+    .modes-grid {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 14px;
+    }
+
+    @media (min-width: 880px) {
+      .modes-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    .mode-card {
+      position: relative;
+      border-radius: var(--radius-md);
+      padding: 14px 14px 16px;
+      background:
+        radial-gradient(circle at 0 0, rgba(24, 226, 255, 0.25), transparent 60%),
+        radial-gradient(circle at 100% 100%, rgba(255, 51, 85, 0.25), transparent 65%),
+        rgba(3, 7, 16, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.9);
+      overflow: hidden;
+      transform-origin: center;
+      transition: transform var(--transition-med), box-shadow var(--transition-med), border-color var(--transition-med), background var(--transition-med);
+    }
+
+    .mode-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(24, 226, 255, 0.12), transparent 55%);
+      opacity: 0;
+      transition: opacity var(--transition-med);
+    }
+
+    .mode-card:hover,
+    .mode-card:focus-within {
+      transform: translateY(-4px);
+      border-color: rgba(24, 226, 255, 0.7);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.98);
+    }
+
+    .mode-card:hover::before,
+    .mode-card:focus-within::before {
+      opacity: 1;
+    }
+
+    .mode-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--accent-primary);
+      margin-bottom: 6px;
+    }
+
+    .mode-title {
+      font-family: "Rajdhani", system-ui, sans-serif;
+      font-size: 17px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .mode-copy {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 10px;
+    }
+
+    .mode-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: rgba(255, 255, 255, 0.55);
+      border-top: 1px solid rgba(255, 255, 255, 0.14);
+      padding-top: 8px;
+    }
+
+    .mode-pill {
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(255, 255, 255, 0.26);
+      background: rgba(3, 7, 16, 0.95);
+      font-size: 10px;
+    }
+
+    .mode-ping {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+    }
+
+    .ping-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #21ff7a;
+      box-shadow: 0 0 10px rgba(33, 255, 122, 0.95);
+    }
+
+    .stats-panel {
+      margin-top: 18px;
+      border-radius: var(--radius-lg);
+      padding: 14px 14px 16px;
+      background:
+        radial-gradient(circle at 0 0, rgba(24, 226, 255, 0.26), transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(255, 51, 85, 0.26), transparent 60%),
+        var(--bg-card-soft);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stats-rows {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 14px;
+    }
+
+    @media (min-width: 720px) {
+      .stats-rows {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
+    .stat-item {
+      position: relative;
+      padding: 8px 8px 10px;
+      border-radius: var(--radius-md);
+      background: rgba(3, 7, 16, 0.94);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 10px;
+      color: var(--text-muted);
+      overflow: hidden;
+    }
+
+    .stat-item::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 0 0, rgba(24, 226, 255, 0.25), transparent 70%);
+      opacity: 0;
+      transition: opacity var(--transition-med);
+    }
+
+    .stat-item:hover::before,
+    .stat-item:focus-within::before {
+      opacity: 1;
+    }
+
+    .stat-value {
+      font-family: "Rajdhani", system-ui, sans-serif;
+      font-size: 18px;
+      margin-bottom: 2px;
+      letter-spacing: 0.08em;
+      color: var(--text-main);
+    }
+
+    .stat-caption {
+      font-size: 9px;
+      color: var(--text-muted);
+    }
+
+    .cta-final {
+      margin-top: 24px;
+      border-radius: 20px;
+      padding: 18px 18px 20px;
+      background:
+        radial-gradient(circle at 0 0, rgba(24, 226, 255, 0.26), transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(255, 51, 85, 0.3), transparent 60%),
+        linear-gradient(135deg, #050814, #020309);
+      border: 1px solid rgba(24, 226, 255, 0.55);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.96);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-final::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(to right, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
+      background-size: 130px 100%;
+      mix-blend-mode: soft-light;
+      opacity: 0.12;
+    }
+
+    .cta-inner {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(0, auto);
+      gap: 18px;
+      align-items: center;
+    }
+
+    @media (max-width: 640px) {
+      .cta-inner {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .cta-kicker {
+      font-family: "Rajdhani", system-ui, sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent-primary);
+      margin-bottom: 6px;
+    }
+
+    .cta-title {
+      font-family: "Rajdhani", system-ui, sans-serif;
+      font-size: 20px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .cta-text {
+      font-size: 13px;
+      color: var(--text-muted);
+      max-width: 420px;
+      line-height: 1.7;
+    }
+
+    .cta-meta {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: rgba(255, 255, 255, 0.6);
+      margin-top: 6px;
+    }
+
+    .cta-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-end;
+    }
+
+    @media (max-width: 640px) {
+      .cta-actions {
+        align-items: flex-start;
+      }
+    }
+
+    .cta-note {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: rgba(255, 255, 255, 0.6);
+    }
   </style>
 </head>
 <body>
-  <div class="app">
-    <div class="topbar">
-      <div class="brand"><span class="dot"></span> TARGET SHOOTING RANGE</div>
-      <div class="sub">Aim • Click • Score • Reload</div>
-    </div>
+  <div class="scanline"></div>
+  <div class="noise-overlay"></div>
 
-    <div class="hud">
-      <div class="stat"><div class="label">Score</div><div class="value cyan" id="score">0</div></div>
-      <div class="stat"><div class="label">Time</div><div class="value good" id="time">30</div></div>
-      <div class="stat"><div class="label">Hits</div><div class="value" id="hits">0</div></div>
-      <div class="stat"><div class="label">Accuracy</div><div class="value red" id="accuracy">100%</div></div>
-    </div>
-
-    <div class="game">
-      <div class="range-grid"></div>
-      <div class="arena" id="arena">
-        <div class="crosshair"><i></i></div>
-        <div class="center-msg" id="centerMsg">
-          <div class="big">READY</div>
-          <div class="small">click a target to start</div>
+  <main>
+    <div class="site-shell">
+      <header class="site-header">
+        <div class="brand">
+          <div class="brand-mark"></div>
+          <div class="brand-text">
+            <div class="brand-name">PROJECT BLACKCORE</div>
+            <div class="brand-sub">NEON TACTICAL FPS</div>
+          </div>
         </div>
-        <div class="floating"><b>Tip:</b> Hit the moving targets fast. Faster hits = higher score.</div>
-      </div>
+        <div class="nav-mini">
+          <div class="nav-pill">
+            LIVE OPS
+            <span class="status-dot"></span>
+            <span class="badge">SEASON 03</span>
+          </div>
+          <div class="nav-divider"></div>
+          <div>PC / CONSOLE / CLOUD</div>
+        </div>
+      </header>
+
+      <section class="hero" aria-label="Hero">
+        <div class="hero-left">
+          <div class="hero-left-inner">
+            <div class="hero-badge-row">
+              <div class="pill-tag">
+                <span class="dot"></span>
+                <span class="pulse"></span>
+                LIVE FIRE BUILD
+              </div>
+              <div class="pill-tag">
+                <span class="dot"></span>
+                CROSS-PLAY ENABLED
+              </div>
+            </div>
+
+            <h1 class="hero-title">
+              LOCK. LOAD. <span class="accent">DOMINATE.</span>
+            </h1>
+            <p class="hero-tagline">Ultra-fast tactical firefights. Millisecond decisions. No second chances.</p>
+            <p class="hero-body">
+              Drop into neon-soaked warzones where every peek, slide, and trigger pull decides the round. Built for competitive instincts, calibrated for squad cohesion, tuned for 120 FPS brutality.
+            </p>
+
+            <div class="btn-row" aria-label="Primary actions">
+              <button class="btn btn-primary">
+                <span class="btn-icon">▶</span>
+                PLAY NOW
+              </button>
+              <button class="btn btn-ghost">
+                <span class="btn-icon">◎</span>
+                WATCH TRAILER
+              </button>
+            </div>
+
+            <div class="meta-row">
+              <div class="meta-label">
+                <span class="status-dot"></span>
+                SERVERS: PRIME
+              </div>
+              <div class="meta-pill">RANKED • UNRANKED • CUSTOM LOBBIES</div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="hero-right" aria-label="Squad status and holo figure">
+          <div class="hud-frame"></div>
+          <div class="hud-corner tl"></div>
+          <div class="hud-corner tr"></div>
+          <div class="hud-corner bl"></div>
+          <div class="hud-corner br"></div>
+
+          <div class="squad-grid" aria-label="Squad overview">
+            <article class="squad-card">
+              <div class="squad-role">ASSAULT</div>
+              <div class="squad-name">REACTOR–01</div>
+              <div class="squad-meta">
+                ENTRY FRAG • <span>FULL SEND</span>
+              </div>
+              <div class="squad-reticle"></div>
+            </article>
+            <article class="squad-card">
+              <div class="squad-role">RECON</div>
+              <div class="squad-name">GHOST–12</div>
+              <div class="squad-meta">
+                VISION DENIAL • <span>HARD INFO</span>
+              </div>
+              <div class="squad-reticle"></div>
+            </article>
+            <article class="squad-card">
+              <div class="squad-role">SNIPER</div>
+              <div class="squad-name">ECLIPSE–07</div>
+              <div class="squad-meta">
+                LONG RANGE • <span>ONE TAP</span>
+              </div>
+              <div class="squad-reticle"></div>
+            </article>
+            <article class="squad-card">
+              <div class="squad-role">SUPPORT</div>
+              <div class="squad-name">NOMAD–21</div>
+              <div class="squad-meta">
+                UTILITY • <span>ANCHOR</span>
+              </div>
+              <div class="squad-reticle"></div>
+            </article>
+          </div>
+
+          <div class="holo-figure">
+            <div class="holo-silhouette-wrap" aria-hidden="true">
+              <div class="holo-circle"></div>
+              <div class="holo-glow-ring"></div>
+              <div class="holo-silhouette"></div>
+              <div class="holo-base"></div>
+            </div>
+            <div class="holo-data">
+              <div class="holo-title">OPERATOR PROFILE</div>
+              <div class="holo-name">NEON FRONTLINER</div>
+              <p class="holo-desc">
+                Designed for breach, clear, and hold. Built to tear through choke points, lock down sites, and own the opening duel every single round.
+              </p>
+              <div class="holo-tags">
+                <span class="tag-chip">CLOSE–MID RANGE</span>
+                <span class="tag-chip">ENTRY STACK</span>
+                <span class="tag-chip">FRAG FIRST</span>
+              </div>
+              <div class="holo-footer-line">
+                <div class="holo-health">
+                  HP
+                  <div class="health-bar">
+                    <div class="health-fill"></div>
+                  </div>
+                </div>
+                <div>SYNC: SQUAD DELTA</div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section aria-label="Game features">
+        <div class="section-label">SYSTEM CORE</div>
+        <h2 class="section-heading">Every round is a razor edge</h2>
+        <p class="section-subtitle">
+          PROJECT BLACKCORE is built around split-second decisions, coordinated utility, and ruthless gunplay. No random bloom, no coin flips – just pure mechanical expression.
+        </p>
+
+        <div class="features-wrap">
+          <article class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3 class="feature-title">Fast-paced combat</h3>
+            <p class="feature-copy">
+              Snap to cover, slide into duels, and chain movement tech to outpace every lobby. Gunfights are crisp, lethal, and brutally honest about who shot first.
+            </p>
+            <div class="feature-meta-line">
+              <span class="dot"></span>
+              <span>0.01s TICK PRECISION</span>
+            </div>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon">🎯</div>
+            <h3 class="feature-title">Tactical teamplay</h3>
+            <p class="feature-copy">
+              Tight callouts, layered utility, and role-driven compositions turn every push into a playbook moment. Solo queue heroics still shine – but squads win wars.
+            </p>
+            <div class="feature-meta-line">
+              <span class="dot"></span>
+              <span>4–STACK READY</span>
+            </div>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon">🛠</div>
+            <h3 class="feature-title">Weapon customization</h3>
+            <p class="feature-copy">
+              Tune recoil, ADS speed, and handling with precision-built modules. Build laser-straight rifles, snappy SMGs, or heavy anchor kits for anchor holds.
+            </p>
+            <div class="feature-meta-line">
+              <span class="dot"></span>
+              <span>MODULAR ATTACHMENTS</span>
+            </div>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon">🏅</div>
+            <h3 class="feature-title">Ranked battles</h3>
+            <p class="feature-copy">
+              Climb through iron chaos to neon elite. Visible MMR, performance-based gains, and anti-smurf calibration keep every bracket sharp and honest.
+            </p>
+            <div class="feature-meta-line">
+              <span class="dot"></span>
+              <span>SEASONAL RESETS</span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section aria-label="Weapons and roles">
+        <div class="section-label">ARSENAL GRID</div>
+        <h2 class="section-heading">Weapons that reward control</h2>
+        <p class="section-subtitle">
+          Master a core arsenal of precision-built tools – from spray-transfer rifles to silent single-tap monsters. Every pattern can be learned, every duel can be earned.
+        </p>
+
+        <div class="weapons-layout">
+          <article class="weapon-main">
+            <div class="weapon-hud-bar">
+              <span>PRIMARY PLATFORM // CORE ISSUE</span>
+              <span class="right">
+                <span>CAL: 5.56</span>
+                <span>MAG: 30</span>
+              </span>
+            </div>
+            <div class="weapon-divider"></div>
+            <h3 class="weapon-name">VX–9 PHANTOM</h3>
+            <div class="weapon-class">ASSAULT RIFLE • FULL CONTROL • PACE DRIVER</div>
+
+            <div class="weapon-stats-grid">
+              <div class="weapon-stat">
+                <span>DAMAGE CURVE</span>
+                <div class="bar-track">
+                  <div class="bar-fill" style="width: 82%;"></div>
+                </div>
+              </div>
+              <div class="weapon-stat">
+                <span>RECOIL TAME</span>
+                <div class="bar-track">
+                  <div class="bar-fill" style="width: 74%;"></div>
+                </div>
+              </div>
+              <div class="weapon-stat">
+                <span>MOBILITY</span>
+                <div class="bar-track">
+                  <div class="bar-fill" style="width: 69%;"></div>
+                </div>
+              </div>
+              <div class="weapon-stat">
+                <span>SPRAY TRACE</span>
+                <div class="bar-track">
+                  <div class="bar-fill" style="width: 91%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <p class="weapon-copy">
+              Built for the player who never stops taking space. Laser-straight first ten bullets, predictable climb, and just enough kick to reward true recoil discipline.
+            </p>
+
+            <div class="weapon-wireframe" aria-hidden="true"></div>
+          </article>
+
+          <div class="weapon-types" aria-label="Weapon lineup">
+            <article class="weapon-mini">
+              <div class="weapon-mini-header">
+                <div class="weapon-mini-name">KRAKEN–L</div>
+                <div class="weapon-mini-label">PRECISION BOLT</div>
+                <div class="weapon-mini-tag">SNIPER • ONE ROUND, ONE BODY</div>
+              </div>
+              <div>
+                <div class="weapon-mini-meter">
+                  <div class="weapon-mini-fill" style="width: 95%;"></div>
+                </div>
+              </div>
+              <div class="weapon-mini-reticle"></div>
+            </article>
+
+            <article class="weapon-mini">
+              <div class="weapon-mini-header">
+                <div class="weapon-mini-name">VELOCITY–S</div>
+                <div class="weapon-mini-label">CLOSE QUARTERS</div>
+                <div class="weapon-mini-tag">SMG • ENTRY SWEEPER</div>
+              </div>
+              <div>
+                <div class="weapon-mini-meter">
+                  <div class="weapon-mini-fill" style="width: 88%;"></div>
+                </div>
+              </div>
+              <div class="weapon-mini-reticle"></div>
+            </article>
+
+            <article class="weapon-mini">
+              <div class="weapon-mini-header">
+                <div class="weapon-mini-name">BULWARK–G</div>
+                <div class="weapon-mini-label">AREA CONTROL</div>
+                <div class="weapon-mini-tag">SUPPORT • SITE ANCHOR</div>
+              </div>
+              <div>
+                <div class="weapon-mini-meter">
+                  <div class="weapon-mini-fill" style="width: 72%;"></div>
+                </div>
+              </div>
+              <div class="weapon-mini-reticle"></div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section aria-label="Game modes">
+        <div class="section-label">MODE SELECT</div>
+        <h2 class="section-heading">Pick your kind of chaos</h2>
+        <p class="section-subtitle">
+          Whether you live for clean 5v5 trades, clutch bomb plants, or last-circle madness, every mode is tuned to keep the adrenaline pinned in the red.
+        </p>
+
+        <div class="modes-grid">
+          <article class="mode-card">
+            <div class="mode-label">CORE COMPETITIVE</div>
+            <h3 class="mode-title">Team deathmatch</h3>
+            <p class="mode-copy">
+              Nonstop trades, instant respawns, and roaring scorefeeds. Run aim drills in live fire lobbies where the only objective is overwhelming pressure.
+            </p>
+            <div class="mode-meta">
+              <span class="mode-pill">6V6 • ROTATING HOTSPOTS</span>
+              <span class="mode-ping">
+                <span class="ping-dot"></span>
+                24MS AVG
+              </span>
+            </div>
+          </article>
+
+          <article class="mode-card">
+            <div class="mode-label">TACTICAL PRIORITY</div>
+            <h3 class="mode-title">Search &amp; destroy</h3>
+            <p class="mode-copy">
+              No respawns. Plant or defuse. Every round is a tiny war of utility, sound cues, and nerves. One misread callout and the whole map collapses.
+            </p>
+            <div class="mode-meta">
+              <span class="mode-pill">5V5 • FIRST TO 13</span>
+              <span class="mode-ping">
+                <span class="ping-dot"></span>
+                STRATEGY HEAVY
+              </span>
+            </div>
+          </article>
+
+          <article class="mode-card">
+            <div class="mode-label">HIGH CHAOS</div>
+            <h3 class="mode-title">Battle royale</h3>
+            <p class="mode-copy">
+              80 operators drop. One squad extracts. Dynamic storm walls, shifting sightlines, and evolving contracts keep every circle edge lethal.
+            </p>
+            <div class="mode-meta">
+              <span class="mode-pill">TRIOS • DYNAMIC LOOT</span>
+              <span class="mode-ping">
+                <span class="ping-dot"></span>
+                HIGH RISK QUEUE
+              </span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section aria-label="Stats and performance">
+        <div class="section-label">COMBAT TELEMETRY</div>
+        <h2 class="section-heading">Numbers that hit like headshots</h2>
+        <p class="section-subtitle">
+          Every system is tuned for clarity, speed, and competitive integrity – from server tick rate to map pool variety. No filler statistics, just raw signal.
+        </p>
+
+        <div class="stats-panel">
+          <div class="stats-rows">
+            <article class="stat-item">
+              <div class="stat-value">50+</div>
+              <div class="stat-caption">Hand-crafted combat spaces</div>
+            </article>
+            <article class="stat-item">
+              <div class="stat-value">20+</div>
+              <div class="stat-caption">Primary weapons in launch arsenal</div>
+            </article>
+            <article class="stat-item">
+              <div class="stat-value">1M+</div>
+              <div class="stat-caption">Operators deployed across seasons</div>
+            </article>
+            <article class="stat-item">
+              <div class="stat-value">120 FPS</div>
+              <div class="stat-caption">Optimized for next-gen displays</div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section aria-label="Final call to action">
+        <div class="cta-final">
+          <div class="cta-inner">
+            <div>
+              <div class="cta-kicker">FINAL CALLSIGN</div>
+              <div class="cta-title">Your squad is already loading in</div>
+              <p class="cta-text">
+                Step through the breach, sync with your fireteam, and carve your name into the killfeed. PROJECT BLACKCORE is live, evolving, and waiting for your first round.
+              </p>
+              <div class="cta-meta">REGION–LOCKED MATCHMAKING • ANTI-CHEAT • RANKED LADDER LIVE</div>
+            </div>
+            <div class="cta-actions">
+              <button class="btn btn-primary">
+                <span class="btn-icon">▶</span>
+                DEPLOY NOW
+              </button>
+              <div class="cta-note">NO RESPAWNS FOR REGRET</div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
-
-    <div class="footer">
-      <div class="btns">
-        <button class="primary" id="startBtn">Start Session</button>
-        <button class="ghost" id="resetBtn">Reset</button>
-      </div>
-      <div class="note" id="status">30 seconds • 1 target at a time • no JavaScript frameworks</div>
-    </div>
-  </div>
-
-  <script>
-    const arena = document.getElementById('arena');
-    const scoreEl = document.getElementById('score');
-    const timeEl = document.getElementById('time');
-    const hitsEl = document.getElementById('hits');
-    const accEl = document.getElementById('accuracy');
-    const statusEl = document.getElementById('status');
-    const centerMsg = document.getElementById('centerMsg');
-    const startBtn = document.getElementById('startBtn');
-    const resetBtn = document.getElementById('resetBtn');
-
-    let score = 0, hits = 0, misses = 0, time = 30, running = false, timer = null, target = null, moveTimer = null;
-
-    function updateHUD(){
-      scoreEl.textContent = score;
-      hitsEl.textContent = hits;
-      timeEl.textContent = time;
-      const shots = hits + misses;
-      accEl.textContent = shots ? Math.round((hits / shots) * 100) + '%' : '100%';
-    }
-
-    function clearTarget(){
-      if (target && target.parentNode) target.parentNode.removeChild(target);
-      target = null;
-      clearInterval(moveTimer);
-      moveTimer = null;
-    }
-
-    function spawnTarget(){
-      clearTarget();
-      const rect = arena.getBoundingClientRect();
-      const size = Math.max(54, Math.min(86, rect.width * 0.075));
-      const margin = size / 2 + 18;
-      target = document.createElement('div');
-      target.className = 'target';
-      target.style.width = size + 'px';
-      target.style.height = size + 'px';
-      let x = margin + Math.random() * (rect.width - margin * 2);
-      let y = margin + Math.random() * (rect.height - margin * 2);
-      let vx = (Math.random() * 2.4 + 1.8) * (Math.random() < .5 ? -1 : 1);
-      let vy = (Math.random() * 2.1 + 1.4) * (Math.random() < .5 ? -1 : 1);
-      const half = size / 2;
-      target.style.left = x + 'px';
-      target.style.top = y + 'px';
-      target.addEventListener('click', e => {
-        e.stopPropagation();
-        if (!running) return;
-        hits++;
-        score += 100;
-        target.classList.add('hit');
-        updateHUD();
-        setTimeout(() => { if (running) spawnTarget(); }, 120);
-      });
-      arena.appendChild(target);
-      moveTimer = setInterval(() => {
-        if (!running || !target) return;
-        x += vx; y += vy;
-        if (x < half || x > rect.width - half) vx *= -1;
-        if (y < half || y > rect.height - half) vy *= -1;
-        x = Math.max(half, Math.min(rect.width - half, x));
-        y = Math.max(half, Math.min(rect.height - half, y));
-        target.style.left = x + 'px';
-        target.style.top = y + 'px';
-      }, 16);
-    }
-
-    function endGame(){
-      running = false;
-      clearInterval(timer); timer = null;
-      clearTarget();
-      centerMsg.innerHTML = `<div class="big">TIME UP</div><div class="small">final score: ${score}</div>`;
-      statusEl.textContent = 'Session complete • Press Reset or Start Session to play again';
-      startBtn.textContent = 'Play Again';
-    }
-
-    function startGame(){
-      if (running) return;
-      if (time <= 0) resetGame();
-      running = true;
-      centerMsg.innerHTML = '<div class="big">FIRE!</div><div class="small">take your first shot</div>';
-      statusEl.textContent = 'Game live • targets move every frame';
-      startBtn.textContent = 'Running...';
-      spawnTarget();
-      timer = setInterval(() => {
-        time--;
-        updateHUD();
-        if (time <= 0) endGame();
-      }, 1000);
-      setTimeout(() => {
-        if (running) centerMsg.innerHTML = '<div class="big">AIM</div><div class="small">keep the streak alive</div>';
-      }, 1200);
-    }
-
-    function resetGame(){
-      running = false;
-      clearInterval(timer); timer = null;
-      clearTarget();
-      score = 0; hits = 0; misses = 0; time = 30;
-      updateHUD();
-      centerMsg.innerHTML = '<div class="big">READY</div><div class="small">click a target to start</div>';
-      statusEl.textContent = '30 seconds • 1 target at a time • no JavaScript frameworks';
-      startBtn.textContent = 'Start Session';
-    }
-
-    arena.addEventListener('click', () => {
-      if (!running) return;
-      misses++;
-      score = Math.max(0, score - 10);
-      updateHUD();
-    });
-
-    startBtn.addEventListener('click', startGame);
-    resetBtn.addEventListener('click', resetGame);
-    updateHUD();
-  </script>
+  </main>
 </body>
 </html>
